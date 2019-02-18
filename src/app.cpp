@@ -10,18 +10,11 @@
 #include<vector>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
+#include "transform.h"
 using namespace glm;
 
 
 
-//std::vector<std::vector<float> > rotateX(float anglee) {
-//	std::vector<std::vector<float> > vect{ { 1,			0,				0,           0},
-//										   { 0,			cos(anglee),   -sin(anglee), 0},
-//										   { 0,			sin(anglee),	cos(anglee), 0},
-//										   { 0,			0,				0,			 1} };
-//
-//	return vect;
-//}
 
 
 
@@ -153,7 +146,7 @@ int main() {
 	ourShaders.use();
 	glClear(GL_COLOR_BUFFER_BIT);
 	float anglee = 0;
-
+	Transform transform;
 	do {
 		// Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
 
@@ -164,13 +157,21 @@ int main() {
 
 		// Use our shader
 		// be sure to activate the shader
-		
-		/*ourShaders.use();
 
-		std::vector<std::vector<float>> trans = rotateX(anglee);
+
+		float *transX = transform.rotateX(anglee);
+		float *transY = transform.rotateY(anglee/2);
+		float *transZ = transform.rotateZ(-anglee/5);
+		
+		ourShaders.use();
+
 		ourShaders.use();
 		unsigned int transformLoc = glGetUniformLocation(ourShaders.program, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float*)&trans);*/
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transX);
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transY);
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transZ);
+		
+
 
 
 
@@ -180,13 +181,13 @@ int main() {
 
 
 		
-		glm::mat4 trans = glm::mat4(1.0f);
-		/*trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));*/
-		trans = glm::rotate(trans, (float)glm::radians(anglee), glm::vec3(1.0f, 1.0f, 0.0f));
-		ourShaders.use();
-		std::cout << glm::to_string(trans) << std::endl;
-		unsigned int transformLoc = glGetUniformLocation(ourShaders.program, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		//glm::mat4 trans = glm::mat4(1.0f);
+		///*trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));*/
+		//trans = glm::rotate(trans, (float)glm::radians(anglee), glm::vec3(1.0f, 1.0f, 0.0f));
+		//ourShaders.use();
+		//std::cout << glm::to_string(trans) << std::endl;
+		//unsigned int transformLoc = glGetUniformLocation(ourShaders.program, "transform");
+		//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		// update the uniform color
 		/*float timeValue = glfwGetTime();
@@ -202,10 +203,13 @@ int main() {
 		
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size()*sizeof(glm::vec3)); // Starting from vertex 0; 3 vertices total -> 1 triangle
 		
-		anglee += 0.2;
+		anglee += 0.02;
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		delete transX;
+		delete transY;
+		delete transZ;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
