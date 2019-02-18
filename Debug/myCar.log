@@ -1,4 +1,0 @@
-﻿  app.cpp
-c:\dev\graphics\project\mycar\mycar\src\app.cpp(205): warning C4305: '+=': truncation from 'double' to 'float'
-c:\dev\graphics\project\mycar\mycar\src\loadobject.hpp(220): warning C4715: 'loadObj': not all control paths return a value
-  myCar.vcxproj -> C:\dev\graphics\project\myCar\Debug\myCar.exe
