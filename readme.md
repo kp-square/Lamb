@@ -1,4 +1,4 @@
------------------To run this project------------------
+-----------------To run this project------------------    
 Setting up visual studio  
 	1. Open up visual studio. I am using visual studio 2017 community edition  
 	2. Create an empty VC++ project.  
