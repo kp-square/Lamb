@@ -11,14 +11,33 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 #include "transform.h"
+#define SCR_WIDTH 800
+#define SCR_HEIGHT 600
+#define pi 3.1459
 using namespace glm;
 
+/*
+void processInput(GLFWwindow *window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+	float cameraSpeed = 2.5 * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+*/
 
 
 
 
-
-//source : www.opengl-tuotrial.org
 
 int main() {
 	glewExperimental = true; // Needed for core profile
@@ -36,7 +55,7 @@ int main() {
 
 	// Open a window and create its OpenGL context
 	GLFWwindow* window; // (In the accompanying source code, this variable is global for simplicity)
-	window = glfwCreateWindow(1366, 768, "graphics project : Lamborgini", NULL, NULL);
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "graphics project : Lamborgini", NULL, NULL);
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
 		glfwTerminate();
@@ -63,7 +82,7 @@ int main() {
 	std::vector< glm::vec3 > vertices;
 	std::vector< glm::vec2 > uvs;
 	std::vector< glm::vec3 > normals; // Won't be used at the moment.
-	bool res = loadObj("C:\\dev\\graphics\\project\\myCar\\myCar\\myCar.txt", vertices, uvs, normals);
+	bool res = loadObj("C:\\dev\\graphics\\project\\myCar\\myCar\\myCar2.txt", vertices, uvs, normals);
 	static const GLfloat g_vertex_buffer_data[] = {
 	-0.5f,-0.5f,-0.5f, // triangle 1 : begin
 	-0.5f,-0.5f, 0.5f,
@@ -146,7 +165,9 @@ int main() {
 	ourShaders.use();
 	glClear(GL_COLOR_BUFFER_BIT);
 	float anglee = 0;
+	float ztranslate = 0;
 	Transform transform;
+	
 	do {
 		// Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
 
@@ -159,18 +180,65 @@ int main() {
 		// be sure to activate the shader
 
 
-		float *transX = transform.rotateX(anglee);
+		float *transX = transform.rotateX(anglee/10);
 		float *transY = transform.rotateY(anglee/2);
-		float *transZ = transform.rotateZ(-anglee/5);
+		float *transZ = transform.rotateZ(anglee);
+		float *projection = transform.getPerspectiveMatrix(pi/4, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1, 100.0);
+		float *view = transform.translate(0, 0, -ztranslate);
 		
 		ourShaders.use();
 
 		ourShaders.use();
-		unsigned int transformLoc = glGetUniformLocation(ourShaders.program, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transX);
+		unsigned int transformLoc = glGetUniformLocation(ourShaders.program, "model");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transY);
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transZ);
+		/*glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transX);
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transZ);*/
 		
+		unsigned int projectLoc = glGetUniformLocation(ourShaders.program, "projection");
+		glUniformMatrix4fv(projectLoc, 1, GL_FALSE, projection);
+
+
+		unsigned int translateLoc = glGetUniformLocation(ourShaders.program, "view");
+		glUniformMatrix4fv(translateLoc, 1, GL_FALSE, view);
+		
+
+
+		//Adding Camera feature
+		//Camera start
+
+
+		float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		
+
+
+
+		//Camera stop
+
+
+
+
+
+				//		// create transformations
+				//		/*glm::mat4 model = glm::mat4(1.0f);*/ // make sure to initialize matrix to identity matrix first
+				//glm::mat4 view = glm::mat4(1.0f);
+				//glm::mat4 projection = glm::mat4(1.0f);
+				//		//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.3f, -1.0f, 0.0f));
+				//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+				//projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+				//		// retrieve the matrix uniform locations
+				//		//unsigned int modelLoc = glGetUniformLocation(ourShaders.program, "model");
+				//unsigned int viewLoc = glGetUniformLocation(ourShaders.program, "view");
+				//		// pass them to the shaders (3 different ways)
+				//		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+				//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+				//		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+				//ourShaders.setMat4("projection", projection);
+
+
+
+
 
 
 
@@ -204,13 +272,15 @@ int main() {
 		glDrawArrays(GL_TRIANGLES, 0, vertices.size()*sizeof(glm::vec3)); // Starting from vertex 0; 3 vertices total -> 1 triangle
 		
 		anglee += 0.02;
+		ztranslate += -0.1;
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		delete transX;
 		delete transY;
 		delete transZ;
-
+		delete projection;
+		delete view;
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
